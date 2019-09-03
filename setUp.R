@@ -2,14 +2,14 @@
 # Packages ----------------------------------------------------------------
 
 library(pacman)
-p_load(foreach, data.table, brainGraph, doParallel, tidyverse, abind)
+p_load(foreach, data.table, brainGraph, doParallel, tidyverse, plyr, abind)
 
 # Number of cores for parallel
-registerDoParallel(cores = (detectCores(logical = F)/2))
+registerDoParallel(cores = (detectCores(logical = F)-2))
 
 # Functions ---------------------------------------------------------------
 
-#source("")
+source("customFunctions.R")
 
 # Day and Directories -----------------------------------------------------
 

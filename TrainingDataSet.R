@@ -2,7 +2,7 @@
 # Group variables ---------------------------------------------------------
 
 groups <- c("HC", "CU")
-thresholds <- rev(seq(0.01, 0.6, 0.01))
+thresholds <- seq(0.01, 0.6, 0.01)
 subThresh <- 0.65
 
 # Covars ------------------------------------------------------------------
@@ -44,11 +44,11 @@ power264[network == "Ventral attention", networkLabel := "VAN"]
 # pVAN <- power[networkLabel == "VAN"]
 
 # Timeseries -> Correlations ----------------------------------------------
-
-timeSeries <- readTimeSeries('inData/TimeSeries/power264')
-writeCorMats(timeSeries2Corrs(timeSeries), 'inData/CorMatsRaw')
-corMats <- readCorMats('inData/CorMatsRaw')
-writeCorMats(corMats, 'inData/CorMats')
+# 
+# timeSeries <- readTimeSeries('inData/TimeSeries/power264')
+# writeCorMats(timeSeries2Corrs(timeSeries), 'inData/CorMatsRaw')
+# corMats <- readCorMats('inData/CorMatsRaw')
+# writeCorMats(corMats, 'inData/CorMats')
 # subMats(corMats, T, 'inData/subNets')
 
 # Adjacency Matrix --------------------------------------------------------
@@ -69,27 +69,27 @@ A.norm.mean <- mats$A.norm.mean
 gGroup <- g <- fnames <- vector('list', length = length(groups))
 
 for (i in seq_along(groups)) {
-    for (j in seq_along(tresholds)) {
+    for (j in seq_along(thresholds)) {
     print(paste0('Threshold ', j, '/', length(thresholds),
                      '; group ', i, '; ',
                      format(Sys.time(), '%H:%M:%S')))
-        foreach(k=seq_along(inds[[i]])) %dopar% {
+        foreach(k = seq_along(inds[[i]])) %dopar% {
             gTmp <- graph_from_adjacency_matrix(
                 A.norm.sub[[j]][, , inds[[i]][k]], mode = 'undirected',
                 diag = F, weighted = T
             )
             V(gTmp)$name <- as.character(power264$name)
             gTmp <- setBgAttr(
-                gTmp, atlas, modality = 'fmri', weighting = 'sld',
+                gTmp, atlas, modality = 'fmri',
                 threshold = thresholds[j],
                 subject = covars[groups[i], Study.ID[k]],
                 group = groups[i], use.parallel = F,
-                A = A.norm.sub[[j]][, , inds_p[[i]][k]]
+                A = A.norm.sub[[j]][, , inds[[i]][k]]
             )
             
             write_rds(
                 gTmp, paste0(
-                    savedir1,
+                    savedirDay,
                     sprintf('g%i_thr%02i_subj%03i%s', i, j, k, '.rds')))
         }
     }
@@ -107,7 +107,7 @@ for (i in seq_along(groups)) {
     
     gGroup[[i]] <- llply(seq_along(thresholds), function(x)
         setBgAttr(
-            gGroup[[i]][[x]], atlas, modality = 'fmri', weigthing = 'sld',
+            gGroup[[i]][[x]], atlas, modality = 'fmri',
             threshold = thresholds[x], group = groups[i],
             A = A.norm.mean[[x]][[i]], use.parallel = F),
         .parallel = T
@@ -120,6 +120,8 @@ for (i in seq_along(groups)) {
         fnames[[i]][[j]] <- list.files(
             savedir, sprintf('*g%i_thr%02i.*', i, j), full.names = T
         )
+        
+        g[[i]][[j]] <- lapply(fnames[[i]][[j]], readRDS)
         
         x <- all.equal(sapply(g[[i]][[1]], graph_attr, 'name'),
                        covars[groups[i], Study.ID])
