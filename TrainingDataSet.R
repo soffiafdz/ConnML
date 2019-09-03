@@ -45,7 +45,7 @@ power264[network == "Ventral attention", networkLabel := "VAN"]
 
 # Timeseries -> Correlations ----------------------------------------------
 
-timeSeries <- readTimeSeries('inData/ConnNets')
+timeSeries <- readTimeSeries('inData/TimeSeries/power264')
 writeCorMats(timeSeries2Corrs(timeSeries), 'inData/CorMatsRaw')
 corMats <- readCorMats('inData/CorMatsRaw')
 writeCorMats(corMats, 'inData/CorMats')
