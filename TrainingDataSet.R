@@ -1,9 +1,9 @@
-
+source('setUp.R')
 # Group variables ---------------------------------------------------------
 
 groups <- c("HC", "CU")
-thresholds <- seq(0.01, 0.6, 0.01)
-subThresh <- 0.65
+thresholds <- seq(0.01, 0.45, 0.01)
+subThresh <- 0.5
 
 # Covars ------------------------------------------------------------------
 
@@ -44,7 +44,7 @@ power264[network == "Ventral attention", networkLabel := "VAN"]
 # pVAN <- power[networkLabel == "VAN"]
 
 # Timeseries -> Correlations ----------------------------------------------
-# 
+#
 # timeSeries <- readTimeSeries('inData/TimeSeries/power264')
 # writeCorMats(timeSeries2Corrs(timeSeries), 'inData/CorMatsRaw')
 # corMats <- readCorMats('inData/CorMatsRaw')
@@ -54,10 +54,10 @@ power264[network == "Ventral attention", networkLabel := "VAN"]
 # Adjacency Matrix --------------------------------------------------------
 
 mFiles <- readCorMats('inData/CorMats', Files = T)
-inds <- lapply(seq_along(groups), function(x) 
+inds <- lapply(seq_along(groups), function(x)
     covars[, which(group == groups[x])])
 mats <- createMats(
-    unlist(mFiles), modality = 'fmri', threshold.by = 'consensus', 
+    unlist(mFiles), modality = 'fmri', threshold.by = 'consensus',
     mat.thresh = thresholds, sub.thresh = subThresh, inds = inds
 )
 
@@ -86,25 +86,25 @@ for (i in seq_along(groups)) {
                 group = groups[i], use.parallel = F,
                 A = A.norm.sub[[j]][, , inds[[i]][k]]
             )
-            
+
             write_rds(
                 gTmp, paste0(
                     savedirDay,
                     sprintf('g%i_thr%02i_subj%03i%s', i, j, k, '.rds')))
         }
     }
-    
-    # Group mean weighted graphs 
+
+    # Group mean weighted graphs
     print(paste0('Group', i, '; ', format(Sys.time(), '%H:%M:%S')))
     gGroup[[i]] <- lapply(seq_along(thresholds), function(x)
         graph_from_adjacency_matrix(
             A.norm.mean[[x]][[i]], mode = 'undirected', diag = F, weighted = T)
     )
-    
+
     for (x in seq_along(thresholds)) {
         V(gGroup[[i]][[x]])$name <- as.character(power264$name)
     }
-    
+
     gGroup[[i]] <- llply(seq_along(thresholds), function(x)
         setBgAttr(
             gGroup[[i]][[x]], atlas, modality = 'fmri',
@@ -120,9 +120,9 @@ for (i in seq_along(groups)) {
         fnames[[i]][[j]] <- list.files(
             savedir, sprintf('*g%i_thr%02i.*', i, j), full.names = T
         )
-        
+
         g[[i]][[j]] <- lapply(fnames[[i]][[j]], readRDS)
-        
+
         x <- all.equal(sapply(g[[i]][[1]], graph_attr, 'name'),
                        covars[groups[i], Study.ID])
         if (isTRUE(x)) lapply(fnames[[i]], file.remove)
