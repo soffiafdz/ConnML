@@ -141,7 +141,7 @@ createMats <- function (
               sum(kNumSubjs) == length(A.files),
               sub.thresh >= 0 && sub.thresh <= 1)
     A.bin <- A.bin.sums <- A.inds <- NULL
-    A <- read.array(A.files)
+    A <- brainGraph:::read.array(A.files)
     Nv <- nrow(A)
     A[is.nan(A)] <- 0
     A.norm <- A

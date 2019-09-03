@@ -2,7 +2,7 @@
 # Packages ----------------------------------------------------------------
 
 library(pacman)
-p_load(foreach, data.table, brainGraph, doParallel, tidyverse)
+p_load(foreach, data.table, brainGraph, doParallel, tidyverse, abind)
 
 # Number of cores for parallel
 registerDoParallel(cores = (detectCores(logical = F)/2))

@@ -56,8 +56,8 @@ writeCorMats(corMats, 'inData/CorMats')
 mFiles <- readCorMats('inData/CorMats', Files = T)
 inds <- lapply(seq_along(groups), function(x) 
     covars[, which(group == groups[x])])
-mats <- create_mats(
-    flatten(mFiles), modality = 'fmri', threshold.by = 'consensus', 
+mats <- createMats(
+    unlist(mFiles), modality = 'fmri', threshold.by = 'consensus', 
     mat.thresh = thresholds, sub.thresh = subThresh, inds = inds
 )
 
