@@ -2,7 +2,7 @@ source('setUp.R')
 # Group variables ---------------------------------------------------------
 
 groups <- c("HC", "CU")
-thresholds <- seq(0.01, 0.45, 0.01)
+thresholds <- seq(0.01, 0.38, 0.01)
 subThresh <- 0.5
 
 # Covars ------------------------------------------------------------------
@@ -60,6 +60,9 @@ mats <- createMats(
     unlist(mFiles), modality = 'fmri', threshold.by = 'consensus',
     mat.thresh = thresholds, sub.thresh = subThresh, inds = inds
 )
+#
+write_rds(mats, 'outData/RDS/mats.rds')
+# mats <- read_rds('outData/RDS/mats.rds')
 
 # Graph -------------------------------------------------------------------
 
@@ -132,11 +135,45 @@ for (i in seq_along(groups)) {
 write_rds(g, paste0(savedirDay, 'g.rds'))
 write_rds(gGroup, paste0(savedirDay, 'gGroup.rds'))
 
+# g <- read_rds(savedirDay, 'g.rds')
+# gGroup <- read_rds(savedirDay, 'gGroup.rds')
 
+# RandomNets --------------------------------------------------------------
+#
+# kNumRand <- 1e3
+# clustering <- F
+#
+# outdir <- paste0(savedir, '/rand', today)
+#
+# randNets <- analysis_random_graphs(
+#     g, kNumRand, savedir = outdir, clustering = F
+# )
+#
+# write_rds(randNets, paste0(savedirDay, 'randNets.rds'))
+#
+# # randNets <- read_rds(paste0(savedirDay, 'randNets.rds'))
+#
+# rich <- na.omit(randNets$rich)
+# small <- randNets$small
+# rnets <- randNets$rand
 
+# Network attributes  -----------------------------------------------------
 
+# attrNets <- sw <-
+#     vector('list', length = thresholds)
 
-
+# for (i in seq_along(thresholds)) {
+#     lAttr <- list(
+#         graph_attr_dt(g[[1]][[i]]),
+#         graph_attr_dt(g[[2]][[i]])
+#     )
+#
+#     attrNets[[i]] <- rbindlist(lAttr, fill = T)
+#     attrNets[[i]][, `:=`(
+#         Study.ID = factor(Study.ID),
+#         group = factor(group)
+#     )]
+# }
 
 
 
