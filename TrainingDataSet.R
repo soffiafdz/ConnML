@@ -1,3 +1,4 @@
+
 source('setUp.R')
 # Group variables ---------------------------------------------------------
 
@@ -48,7 +49,7 @@ power264[, `:=`(
 
 # Timeseries -> Correlations ----------------------------------------------
 #
-# timeSeries <- readTimeSeries('inData/TimeSeries/power264')
+# timeSeries <- readTimeSeries('inData/TimeSeries/Conn/power264')
 # writeCorMats(timeSeries2Corrs(timeSeries), 'inData/CorMatsRaw')
 # corMats <- readCorMats('inData/CorMatsRaw')
 # writeCorMats(corMats, 'inData/CorMats')
@@ -161,25 +162,42 @@ mats <- read_rds('outData/RDS/mats.rds')
 
 # Network attributes  -----------------------------------------------------
 
-attrNets <- sw <-
-    vector('list', length = length(thresholds))
+# attrNets <- sw <-
+#     vector('list', length = length(thresholds))
 
-for (i in seq_along(thresholds)) {
-    lAttr <- list(
-        graph_attr_dt(g[[1]][[i]]),
-        graph_attr_dt(g[[2]][[i]])
-    )
+# for (i in seq_along(thresholds)) {
+#     lAttr <- list(
+#         graph_attr_dt(g[[1]][[i]]),
+#         graph_attr_dt(g[[2]][[i]])
+#     )
 
-    attrNets[[i]] <- rbindlist(lAttr, fill = T)
-    attrNets[[i]][, `:=`(
-        Study.ID = factor(Study.ID),
-        Group = factor(Group)
-    )]
-}
+#     attrNets[[i]] <- rbindlist(lAttr, fill = T)
+#     attrNets[[i]][, `:=`(
+#         Study.ID = factor(Study.ID),
+#         Group = factor(Group)
+#     )]
+# }
+
+attrNets <- rbindlist(read_rds('outData/RDS/attrNets.rds'))
+
+# Mean summary 
+cols <- sapply(attrNets, is.numeric)
+cols <- names(cols)[cols]
+attrNets[, lapply(.SD, mean, na.rm = T), by=.(Group, threshold), .SDcols = cols]
+
+# T.tests 
+attrNets[, .(
+    Cp = t.test(Cp ~ Group)$p.value, 
+    Lp = t.test(Lp ~ Group)$p.value, 
+    EG = t.test(E.global ~ Group)$p.value, 
+    EL = t.test(E.local ~ Group)$p.value, 
+    Tran = t.test(transitivity ~ Group)$p.value, 
+    Vuln = t.test(vulnerability ~ Group)$p.value
+    ), 
+keyby = .(threshold)]
 
 
-
-
+fwrite(attrNets, "outData/CSV/attrNets.csv")
 
 
 
